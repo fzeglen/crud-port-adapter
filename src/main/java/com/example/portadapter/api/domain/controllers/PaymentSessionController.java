@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.concurrent.ExecutionException;
-
 
 public abstract class PaymentSessionController<T extends PaymentSession<ID>, ID> {
 
@@ -22,7 +20,7 @@ public abstract class PaymentSessionController<T extends PaymentSession<ID>, ID>
 
 
     @PostMapping
-    public PaymentSession<ID> save(@RequestBody final PaymentSessionRest paymentSessionRest) throws ExecutionException, InterruptedException {
+    public PaymentSession<ID> save(@RequestBody final PaymentSessionRest paymentSessionRest) {
         return service.saveFromRest(paymentSessionRest);
     }
 

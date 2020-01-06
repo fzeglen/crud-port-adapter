@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @Profile("kafka")
 @Repository
@@ -17,7 +16,7 @@ public class PaymentSessionKafkaRepositoryImpl implements PaymentSessionKafkaRep
 
     private final PaymentSessionKafkaRepositorySupport paymentSessionKafkaRepositorySupport;
 
-    public PaymentSessionKafkaDomain save(PaymentSessionKafkaDomain s) throws ExecutionException, InterruptedException {
+    public PaymentSessionKafkaDomain save(PaymentSessionKafkaDomain s) {
         if(s.getId() == null){
             s.setId(UUID.randomUUID().toString());
         }

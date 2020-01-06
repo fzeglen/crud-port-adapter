@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 @RequiredArgsConstructor
 public abstract class PaymentSessionService<T extends PaymentSession<ID>, ID> {
@@ -18,12 +17,12 @@ public abstract class PaymentSessionService<T extends PaymentSession<ID>, ID> {
     protected final PaymentSessionRepository<T, ID> repository;
     protected final PaymentSessionValidator<T, ID> validator;
 
-    public T save(T payment) throws ExecutionException, InterruptedException {
+    public T save(T payment) {
         validate(payment);
         return repository.save(payment);
     }
 
-    public PaymentSession<ID> saveFromRest(final PaymentSessionRest paymentSessionRest) throws ExecutionException, InterruptedException {
+    public PaymentSession<ID> saveFromRest(final PaymentSessionRest paymentSessionRest) {
         return save(PaymentSession(paymentSessionRest));
     }
 

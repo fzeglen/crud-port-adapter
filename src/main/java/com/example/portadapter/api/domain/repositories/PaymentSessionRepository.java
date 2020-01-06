@@ -3,7 +3,6 @@ package com.example.portadapter.api.domain.repositories;
 import com.example.portadapter.api.domain.model.PaymentStatus;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 public interface PaymentSessionRepository<T, ID> {
 
@@ -11,6 +10,6 @@ public interface PaymentSessionRepository<T, ID> {
 
     Optional<T> findById(ID id);
 
-    T save(T obj) throws ExecutionException, InterruptedException;
+    T save(T obj);
 
 }

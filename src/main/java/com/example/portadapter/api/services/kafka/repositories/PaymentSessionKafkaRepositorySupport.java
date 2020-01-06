@@ -5,6 +5,7 @@ import com.example.portadapter.api.domain.model.PaymentStatus;
 import com.example.portadapter.api.services.kafka.model.PaymentSessionKafka;
 import com.example.portadapter.api.services.kafka.model.PaymentSessionKafkaDomain;
 import com.example.portadapter.api.services.kafka.processors.PaymentSessionProcessor;
+import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -19,8 +20,6 @@ import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.ExecutionException;
 
 @Profile("kafka")
 @Service
@@ -44,7 +43,7 @@ public class PaymentSessionKafkaRepositorySupport {
         return interactiveQueryService.getQueryableStore(STORAGE, QueryableStoreTypes.keyValueStore());
     }
 
-    public PaymentSessionKafkaRepositorySupport(Processor processor, PaymentSessionProcessor paymentSessionProcessor, InteractiveQueryService interactiveQueryService,ReplyingKafkaTemplate<String, PaymentSessionKafka, PaymentSessionKafka> kafkaTemplate) {
+    public PaymentSessionKafkaRepositorySupport(Processor processor, PaymentSessionProcessor paymentSessionProcessor, InteractiveQueryService interactiveQueryService, ReplyingKafkaTemplate<String, PaymentSessionKafka, PaymentSessionKafka> kafkaTemplate) {
         this.processor = processor;
         this.interactiveQueryService = interactiveQueryService;
         this.kafkaTemplate = kafkaTemplate;
@@ -54,13 +53,14 @@ public class PaymentSessionKafkaRepositorySupport {
         return MessageBuilder.withPayload(s).setHeader(KafkaHeaders.MESSAGE_KEY, s.getAmountDueGuid()).build();
     }
 
-    public PaymentSessionKafkaDomain save(PaymentSessionKafkaDomain paymentSession) throws ExecutionException, InterruptedException {
+    public PaymentSessionKafkaDomain save(PaymentSessionKafkaDomain paymentSession) {
         Message<PaymentSessionKafka> message = createMessage(fromDomain(paymentSession));
-    //    processor.output().send(message);
+        //    processor.output().send(message);
         return toDomain(saveReplayingTemplate(fromDomain(paymentSession)));
     }
 
-    public PaymentSessionKafka saveReplayingTemplate(PaymentSessionKafka paymentSessionKafka) throws ExecutionException, InterruptedException {
+    @SneakyThrows
+    public PaymentSessionKafka saveReplayingTemplate(PaymentSessionKafka paymentSessionKafka) {
         String key = paymentSessionKafka.getAmountDueGuid().toString();
         var record = new ProducerRecord<>(requestTopicName, key, paymentSessionKafka);
 
@@ -68,8 +68,7 @@ public class PaymentSessionKafkaRepositorySupport {
                 .sendAndReceive(record);
 
         ConsumerRecord<String, PaymentSessionKafka> consumerRecord = sendAndReceive.get();
-        PaymentSessionKafka result = consumerRecord.value();
-        return result;
+        return consumerRecord.value();
     }
 
     public PaymentSessionKafkaDomain findById(String id) {
